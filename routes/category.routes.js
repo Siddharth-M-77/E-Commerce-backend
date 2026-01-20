@@ -3,15 +3,18 @@ const router = express.Router();
 
 import {
   createCategory,
+  deleteCategory,
   getCategories,
   getCategoryBySlug,
-  updateCategory,
+  toggleCategoryStatus,
 } from "../controllers/category.controller.js";
 import IsAuthenticated from "../middlewares/IsAuthenticated.js";
+import upload from "../middlewares/upload.js";
 
-router.route("/add").post(IsAuthenticated, createCategory);
+router.route("/add-category").post(upload.single("categoryImage"), IsAuthenticated, createCategory);
 router.route("/get-categories").get(IsAuthenticated, getCategories);
 router.route("/get-categories-by-slug").get(IsAuthenticated, getCategoryBySlug);
-router.route("/update").post(IsAuthenticated, updateCategory);
+router.route("/toggle-category/:id").get(IsAuthenticated, toggleCategoryStatus);
+router.route("/delete-category/:id").delete(IsAuthenticated, deleteCategory);
 
 export default router;

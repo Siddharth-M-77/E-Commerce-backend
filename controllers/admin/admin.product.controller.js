@@ -100,9 +100,8 @@ export const adminToggleProductStatus = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `Product ${
-        product.isActive ? "enabled" : "disabled"
-      } successfully`,
+      message: `Product ${product.isActive ? "enabled" : "disabled"
+        } successfully`,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });

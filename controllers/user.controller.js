@@ -1,6 +1,7 @@
 import UserModel from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
@@ -41,6 +42,7 @@ export const registerUser = async (req, res) => {
     });
   }
 };
+
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -94,6 +96,7 @@ export const loginUser = async (req, res) => {
       .json({
         success: true,
         message: "Login Success",
+        token,
         data: {
           role: user.role,
           name: user.name,
@@ -109,9 +112,10 @@ export const loginUser = async (req, res) => {
     });
   }
 };
+
 export const getMyProfile = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.user._id);
+    const user = req.user;
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -127,6 +131,57 @@ export const getMyProfile = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error",
+      error: error.message,
     });
   }
 };
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { name, email, phone } = req.body;
+    const updateData = {};
+
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (phone) updateData.phone = phone;
+    if (req.file) {
+      updateData.profileImage = req.file.path; // Cloudinary URL
+    }
+
+    // If nothing to update
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No data provided to update",
+      });
+    }
+
+    const user = await UserModel.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user,
+    });
+
+  } catch (error) {
+    console.log("Update Profile Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+

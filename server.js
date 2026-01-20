@@ -4,7 +4,6 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import session from "express-session";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import cookieParser from "cookie-parser";
@@ -27,6 +26,7 @@ import couponRoutes from "./routes/coupon.routes.js";
 import wishlistRoutes from "./routes/wishlist.routes.js";
 
 // ADMIN SIDE
+import adminRoutes from "./routes/admin.routes.js";
 import adminProductRoutes from "./routes/admin/admin.product.routes.js";
 import adminOrderRoutes from "./routes/admin/admin.order.routes.js";
 import adminUserRoutes from "./routes/admin/admin.user.routes.js";
@@ -87,6 +87,8 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 
 // 🔐 ADMIN
+
+app.use("/api/admin", adminRoutes);
 app.use("/api/admin/products", adminProductRoutes);
 app.use("/api/admin/orders", adminOrderRoutes);
 app.use("/api/admin/users", adminUserRoutes);

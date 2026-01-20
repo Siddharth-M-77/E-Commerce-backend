@@ -10,7 +10,6 @@ const addressSchema = new mongoose.Schema(
       index: true,
     },
 
-    // ================= ADDRESS INFO =================
     fullName: {
       type: String,
       required: true,
@@ -20,16 +19,6 @@ const addressSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: true,
-    },
-
-    addressLine1: {
-      type: String,
-      required: true,
-    },
-
-    addressLine2: {
-      type: String,
-      default: "",
     },
 
     city: {
@@ -42,7 +31,7 @@ const addressSchema = new mongoose.Schema(
       required: true,
     },
 
-    pincode: {
+    pinCode: {
       type: String,
       required: true,
     },
@@ -52,14 +41,6 @@ const addressSchema = new mongoose.Schema(
       default: "India",
     },
 
-    // ================= TYPE =================
-    type: {
-      type: String,
-      enum: ["HOME", "OFFICE", "OTHER"],
-      default: "HOME",
-    },
-
-    // ================= DEFAULT =================
     isDefault: {
       type: Boolean,
       default: false,
@@ -68,7 +49,6 @@ const addressSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ================= INDEX =================
 addressSchema.index({ user: 1, isDefault: 1 });
 
 const AddressModel = mongoose.model("Address", addressSchema);

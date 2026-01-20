@@ -2,21 +2,19 @@ import Address from "../models/address.model.js";
 
 export const addAddress = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user._id;
+
     const {
       fullName,
       phone,
-      addressLine1,
-      addressLine2,
       city,
       state,
-      pincode,
+      pinCode,
       country,
-      type,
       isDefault,
     } = req.body;
 
-    if (!fullName || !phone || !addressLine1 || !city || !state || !pincode) {
+    if (!fullName || !phone || !city || !state || !pinCode) {
       return res.status(400).json({
         success: false,
         message: "All required fields missing",
@@ -35,18 +33,16 @@ export const addAddress = async (req, res) => {
       user: userId,
       fullName,
       phone,
-      addressLine1,
-      addressLine2,
       city,
       state,
-      pincode,
+      pinCode,
       country,
-      type,
       isDefault,
     });
 
     res.status(201).json({
       success: true,
+      message: "Address added successfully",
       address,
     });
   } catch (error) {
@@ -60,7 +56,7 @@ export const addAddress = async (req, res) => {
 
 export const getMyAddresses = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user._id;
 
     const addresses = await Address.find({ user: userId }).sort({
       isDefault: -1,
@@ -79,9 +75,10 @@ export const getMyAddresses = async (req, res) => {
     });
   }
 };
+
 export const setDefaultAddress = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user._id;
     const { addressId } = req.params;
 
     await Address.updateMany(
@@ -117,7 +114,7 @@ export const setDefaultAddress = async (req, res) => {
 
 export const deleteAddress = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user._id;
     const { addressId } = req.params;
 
     const address = await Address.findOneAndDelete({

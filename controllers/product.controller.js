@@ -1,31 +1,42 @@
 import Product from "../models/product.model.js";
 import Category from "../models/category.model.js";
 import slugify from "slugify";
+
 export const createProduct = async (req, res) => {
   try {
     const {
       title,
       description,
-      shortDescription,
       price,
       discountPrice,
-      stock,
       category,
-      images,
-      thumbnail,
-      metaTitle,
-      metaDescription,
-      sku,
+      variants,
       isFeatured,
     } = req.body;
 
-    if (!title || !price || !stock || !category || !sku || !thumbnail) {
+    if (!title || !price || !category || !variants?.length) {
       return res.status(400).json({
         success: false,
         message: "Required fields missing",
       });
     }
 
+    const variant = JSON.parse(req.body.variants);
+
+    // Images from Cloudinary
+    const images = req.files?.map(file => ({
+      url: file.path,
+      alt: title
+    }));
+
+    if (!images?.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Product images are required",
+      });
+    }
+
+    // Check category
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
       return res.status(404).json({
@@ -34,6 +45,7 @@ export const createProduct = async (req, res) => {
       });
     }
 
+    // Slug
     const slug = slugify(title, { lower: true });
 
     const productExists = await Product.findOne({ slug });
@@ -44,28 +56,35 @@ export const createProduct = async (req, res) => {
       });
     }
 
+    // Validate variants
+    for (let v of variant) {
+      if (!v.size || !v.color || !v.stock || !v.sku) {
+        return res.status(400).json({
+          success: false,
+          message: "Each variant must have size, color, stock, and sku",
+        });
+      }
+    }
+
+    // Create product
     const product = await Product.create({
       title,
       slug,
       description,
-      shortDescription,
       price,
       discountPrice,
-      stock,
       category,
       images,
-      thumbnail,
-      metaTitle,
-      metaDescription,
-      sku,
+      variants: variant,
       isFeatured,
-      createdBy: req.user.userId,
+      createdBy: req.user.id,
     });
 
     res.status(201).json({
       success: true,
       product,
     });
+
   } catch (error) {
     console.error("Create Product Error:", error);
     res.status(500).json({
@@ -158,27 +177,49 @@ export const getProductBySlug = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    let updateData = req.body;
 
+    // Slug update
     if (updateData.title) {
       updateData.slug = slugify(updateData.title, { lower: true });
     }
 
-    const product = await Product.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
+    // Parse variants (FormData se string aata hai)
+    if (updateData.variants) {
+      updateData.variants = JSON.parse(updateData.variants);
+    }
 
-    if (!product) {
+    // Find existing product
+    const existingProduct = await Product.findById(id);
+
+    if (!existingProduct) {
       return res.status(404).json({
         success: false,
         message: "Product not found",
       });
     }
 
+    // Handle images
+    let images = existingProduct.images;
+
+    if (req.files && req.files.length > 0) {
+      images = req.files.map(file => ({
+        url: file.path,
+        alt: updateData.title || existingProduct.title
+      }));
+    }
+    updateData.images = images;
+
+    const product = await Product.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
+
     res.status(200).json({
       success: true,
+      message: "Product updated successfully",
       product,
     });
+
   } catch (error) {
     console.error("Update Product Error:", error);
     res.status(500).json({
@@ -187,6 +228,8 @@ export const updateProduct = async (req, res) => {
     });
   }
 };
+
+
 export const toggleProductStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -204,9 +247,8 @@ export const toggleProductStatus = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `Product ${
-        product.isActive ? "enabled" : "disabled"
-      } successfully`,
+      message: `Product ${product.isActive ? "enabled" : "disabled"
+        } successfully`,
     });
   } catch (error) {
     res.status(500).json({
@@ -215,3 +257,30 @@ export const toggleProductStatus = async (req, res) => {
     });
   }
 };
+
+
+export const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findByIdAndDelete(id);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Product deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+

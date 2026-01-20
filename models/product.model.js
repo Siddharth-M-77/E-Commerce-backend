@@ -22,12 +22,6 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
 
-    shortDescription: {
-      type: String,
-      default: "",
-    },
-
-    // ================= CATEGORY =================
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
@@ -51,20 +45,33 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
 
-    // ================= STOCK =================
-    stock: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
+    variants: [
+      {
+        size: {
+          type: String,
+          required: true,
+          enum: ["XS", "S", "M", "L", "XL", "XXL"]
+        },
 
-    sku: {
-      type: String,
-      unique: true,
-      required: true,
-    },
+        color: {
+          type: String,
+          required: true
+        },
 
-    // ================= MEDIA =================
+        stock: {
+          type: Number,
+          required: true,
+          min: 0
+        },
+
+        sku: {
+          type: String,
+          required: true,
+        }
+      }
+    ],
+
+
     images: [
       {
         url: { type: String, required: true },
@@ -72,12 +79,6 @@ const productSchema = new mongoose.Schema(
       },
     ],
 
-    thumbnail: {
-      type: String,
-      required: true,
-    },
-
-    // ================= RATINGS =================
     ratings: {
       average: {
         type: Number,
@@ -89,7 +90,6 @@ const productSchema = new mongoose.Schema(
       },
     },
 
-    // ================= FLAGS =================
     isActive: {
       type: Boolean,
       default: true,
@@ -106,18 +106,6 @@ const productSchema = new mongoose.Schema(
       default: false,
     },
 
-    // ================= SEO =================
-    metaTitle: {
-      type: String,
-      default: "",
-    },
-
-    metaDescription: {
-      type: String,
-      default: "",
-    },
-
-    // ================= ADMIN =================
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",
@@ -127,7 +115,6 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ================= INDEXES =================
 productSchema.index({ title: "text", description: "text" });
 productSchema.index({ price: 1 });
 productSchema.index({ category: 1, isActive: 1 });

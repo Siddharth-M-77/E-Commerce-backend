@@ -3,16 +3,18 @@ import slugify from "slugify";
 
 export const createCategory = async (req, res) => {
   try {
-    const { name, description, image, metaTitle, metaDescription } = req.body;
+    let { name, slug, description, isActive } = req.body;
 
     if (!name) {
       return res.status(400).json({
         success: false,
-        message: "Category name required",
+        message: "Category name is required",
       });
     }
 
-    const slug = slugify(name, { lower: true });
+    if (!slug) {
+      slug = slugify(name, { lower: true });
+    }
 
     const exists = await Category.findOne({ slug });
     if (exists) {
@@ -22,20 +24,23 @@ export const createCategory = async (req, res) => {
       });
     }
 
+    // Image from Cloudinary
+    const image = req.file ? req.file.path : null;
+
     const category = await Category.create({
       name,
       slug,
       description,
       image,
-      metaTitle,
-      metaDescription,
-      createdBy: req.user.userId,
+      isActive,
+      createdBy: req.user.id,
     });
 
     res.status(201).json({
       success: true,
       category,
     });
+
   } catch (error) {
     console.error("Create Category Error:", error);
     res.status(500).json({
@@ -47,7 +52,8 @@ export const createCategory = async (req, res) => {
 
 export const getCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ isActive: true }).sort({
+    const id = req.user.id;
+    const categories = await Category.find().sort({
       createdAt: -1,
     });
 
@@ -140,9 +146,32 @@ export const toggleCategoryStatus = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `Category ${
-        category.isActive ? "enabled" : "disabled"
-      } successfully`,
+      message: `Category ${category.isActive ? "enabled" : "disabled"
+        } successfully`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+export const deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const category = await Category.findByIdAndDelete(id);
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Category deleted successfully",
     });
   } catch (error) {
     res.status(500).json({

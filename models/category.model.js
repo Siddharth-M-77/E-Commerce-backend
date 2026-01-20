@@ -31,16 +31,6 @@ const categorySchema = new mongoose.Schema(
       default: true,
     },
 
-    metaTitle: {
-      type: String,
-      default: "",
-    },
-
-    metaDescription: {
-      type: String,
-      default: "",
-    },
-
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
