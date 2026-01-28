@@ -31,6 +31,7 @@ import adminProductRoutes from "./routes/admin/admin.product.routes.js";
 import adminOrderRoutes from "./routes/admin/admin.order.routes.js";
 import adminUserRoutes from "./routes/admin/admin.user.routes.js";
 import adminCouponRoutes from "./routes/admin/admin.coupon.routes.js";
+import bannerRoutes from "./routes/banner.routes.js";
 
 // PAYMENT WEBHOOK
 import paymentRoutes from "./routes/payment.routes.js";
@@ -42,7 +43,7 @@ const app = express();
 app.use("/uploads", express.static(join(__dirname, "uploads")));
 
 /* ================= CORS ================= */
-const allowedOrigins = ["http://localhost:3005", "http://192.168.1.48:3005"];
+const allowedOrigins = ["http://localhost:3005", "http://192.168.29.151:3005"];
 
 app.use(
   cors({
@@ -86,8 +87,10 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 
-// 🔐 ADMIN
+// 🎉 BANNER
+app.use("/api/banners", bannerRoutes);
 
+// 🔐 ADMIN
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin/products", adminProductRoutes);
 app.use("/api/admin/orders", adminOrderRoutes);

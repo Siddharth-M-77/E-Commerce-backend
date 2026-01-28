@@ -1,6 +1,7 @@
 import Admin from "../models/admin.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import UserModel from "../models/user.model.js";
 
 export const adminLogin = async (req, res) => {
     try {
@@ -53,5 +54,37 @@ export const adminLogin = async (req, res) => {
             success: false,
             message: "Server error",
         })
+    }
+}
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await UserModel.find();
+
+        if (!users) {
+            return res.status(404).json({ success: false, message: "Users not found" });
+        }
+
+        return res.status(200).json({ success: true, users });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+}
+
+export const blockUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const user = await UserModel.findById(id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        user.isLoginBlocked = !user.isLoginBlocked;
+        await user.save();
+
+        return res.status(200).json({ success: true, message: `User ${user.isLoginBlocked ? "blocked" : "unblocked"} successfully` });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Server error" });
     }
 }

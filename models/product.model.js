@@ -29,6 +29,13 @@ const productSchema = new mongoose.Schema(
       index: true,
     },
 
+    gender: {
+      type: String,
+      required: true,
+      enum: ["men", "women", "unisex", "kids"],
+      index: true,
+    },
+
     // ================= PRICING =================
     price: {
       type: Number,
@@ -74,6 +81,7 @@ const productSchema = new mongoose.Schema(
 
     images: [
       {
+        public_id: { type: String, required: true },
         url: { type: String, required: true },
         alt: { type: String, default: "" },
       },
@@ -117,7 +125,7 @@ const productSchema = new mongoose.Schema(
 
 productSchema.index({ title: "text", description: "text" });
 productSchema.index({ price: 1 });
-productSchema.index({ category: 1, isActive: 1 });
+productSchema.index({ category: 1, isActive: 1, gender: 1 });
 
 const ProductModel = mongoose.model("Product", productSchema);
 export default ProductModel;
