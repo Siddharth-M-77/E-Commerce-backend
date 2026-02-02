@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema(
   {
-    // ================= BASIC INFO =================
     title: {
       type: String,
       required: true,
@@ -77,7 +76,6 @@ const productSchema = new mongoose.Schema(
         }
       }
     ],
-
 
     images: [
       {

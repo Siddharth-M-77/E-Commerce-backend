@@ -1,17 +1,19 @@
 import express from "express";
-const router = express.Router();
-
 import {
   addToCart,
+  clearCart,
   getMyCart,
   removeFromCart,
   updateCartItem,
 } from "../controllers/cart.controller.js";
 import IsAuthenticated from "../middlewares/IsAuthenticated.js";
 
-router.use("/add", IsAuthenticated, addToCart);
-router.use("/get", IsAuthenticated, getMyCart);
-router.use("/remove", IsAuthenticated, removeFromCart);
-router.use("/update", IsAuthenticated, updateCartItem);
+const router = express.Router();
+
+router.route("/add-to-cart").post(IsAuthenticated, addToCart);
+router.route("/get-my-cart").get(IsAuthenticated, getMyCart);
+router.route("/update-cart-item").put(IsAuthenticated, updateCartItem);
+router.route("/remove-from-cart/:productId?/:sku").delete(IsAuthenticated, removeFromCart);
+router.route("/clear-cart").delete(IsAuthenticated, clearCart);
 
 export default router;

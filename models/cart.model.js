@@ -8,19 +8,19 @@ const cartItemSchema = new mongoose.Schema(
       required: true,
     },
 
-    title: {
-      type: String,
-      required: true,
-    },
-
-    image: {
-      type: String,
-      required: true,
-    },
-
-    price: {
-      type: Number,
-      required: true,
+    variant: {
+      sku: {
+        type: String,
+        required: true,
+      },
+      size: {
+        type: String,
+        required: true,
+      },
+      color: {
+        type: String,
+        required: true,
+      },
     },
 
     quantity: {
@@ -28,57 +28,40 @@ const cartItemSchema = new mongoose.Schema(
       required: true,
       min: 1,
     },
-
-    subtotal: {
-      type: Number,
-      required: true,
-    },
   },
-  { _id: false }
+  { _id: false, timestamps: true }
 );
+
 
 const cartSchema = new mongoose.Schema(
   {
-    // ================= USER =================
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "UserModel",
-      unique: true, // one cart per user
       required: true,
+      unique: true,
       index: true,
     },
 
-    // ================= ITEMS =================
-    items: [cartItemSchema],
-
-    // ================= TOTAL =================
-    totalItems: {
-      type: Number,
-      default: 0,
+    // -------- ITEMS --------
+    items: {
+      type: [cartItemSchema],
+      default: [],
     },
 
-    totalAmount: {
-      type: Number,
-      default: 0,
-    },
-
-    // ================= COUPON =================
-    coupon: {
-      code: { type: String, default: null },
-      discountAmount: { type: Number, default: 0 },
-    },
-
-    // ================= STATUS =================
-    updatedAt: {
-      type: Date,
-      default: Date.now,
+    // -------- COUPON --------
+    couponCode: {
+      type: String,
+      default: null,
     },
   },
   { timestamps: true }
 );
 
-// ================= INDEX =================
-cartSchema.index({ user: 1 });
+cartSchema.index(
+  { user: 1, "items.product": 1, "items.variant.sku": 1 },
+  { unique: true, sparse: true }
+);
 
 const CartModel = mongoose.model("Cart", cartSchema);
 export default CartModel;
